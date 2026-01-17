@@ -8,6 +8,7 @@ from src.game.client import Client
 from src.game.controller import BaseController
 from src.game.interface import BaseInterface
 from src.game.table import MarkType
+import time
 
 #####################################
 #   QUICK MACRO
@@ -33,22 +34,30 @@ def emptyindex_from_table(table: NDArray, ncols: int = 7) -> List[int]:
 #########
 
 class RandomController(BaseController[List[int], int]):
+    def __init__(self, sleep_time: float = 3) -> None:
+        super().__init__()
+        self._sleep_time = sleep_time
+
     def pre_processing(self, input_state: NDArray) -> List[int]:
         return emptyindex_from_table(input_state)
 
     def model_call(self, model_input: List[int]) -> int:
+        time.sleep(self._sleep_time)
         return random.choice(model_input)
 
     def post_processing(self, model_output: int) -> Tuple[int, int]:
         return index_to_coords(model_output)
         
 class HumanController(BaseController[NDArray, Tuple[int, int]]):
-    def __init__(self, nrows: int = 7, ncols: int = 7) -> None:
+    def __init__(self, nrows: int = 7, ncols: int = 7, trial: int = 3) -> None:
         self._nrows = nrows
         self._ncols = ncols
+        self._trial = trial
 
-    def model_call(self, model_input: NDArray) -> Tuple[int, int]:
-        while True:
+    def model_call(self, model_input: NDArray) -> Tuple[int, int]: # type: ignore
+        trial = 0
+        while trial < self._trial:
+            trial += 1
             raw = input("Enter move as: row col > ").strip()
 
             try:
