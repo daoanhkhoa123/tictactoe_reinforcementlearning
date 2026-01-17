@@ -1,15 +1,11 @@
 from enum import IntEnum
-
 import numpy as np
 from numpy.typing import NDArray
-
 
 class MarkType(IntEnum):
     RED = 1
     BLU = -1 
     EMPTY = 0
-
-
 
 class Table:
     def __init__(self) -> None:

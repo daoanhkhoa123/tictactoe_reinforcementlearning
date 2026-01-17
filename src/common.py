@@ -1,4 +1,5 @@
 import random
+import time
 from typing import List, Tuple
 
 import numpy as np
@@ -8,7 +9,6 @@ from src.game.client import Client
 from src.game.controller import BaseController
 from src.game.interface import BaseInterface
 from src.game.table import MarkType
-import time
 
 #####################################
 #   QUICK MACRO
@@ -46,7 +46,9 @@ class RandomController(BaseController[List[int], int]):
         return random.choice(model_input)
 
     def post_processing(self, model_output: int) -> Tuple[int, int]:
-        return index_to_coords(model_output)
+        coords = index_to_coords(model_output)
+        print("Bot chose:", coords)
+        return coords
         
 class HumanController(BaseController[NDArray, Tuple[int, int]]):
     def __init__(self, nrows: int = 7, ncols: int = 7, trial: int = 3) -> None:
@@ -72,6 +74,10 @@ class HumanController(BaseController[NDArray, Tuple[int, int]]):
                 continue
             
             return y, x
+
+############################
+#   Interface
+#######################
 
 class CMDInterface(BaseInterface):
     """
@@ -122,7 +128,7 @@ class CMDInterface(BaseInterface):
 
 class EmptyInterface(BaseInterface):
     def show(self, client: Client, state: NDArray) -> None:
-        print("Bots is thinking...")
+        print("Bot is thinking...")
 
 def build_2clients( name1: str, name2: str,
         controller1: BaseController, controller2: BaseController,
