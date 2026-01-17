@@ -1,11 +1,13 @@
+import random
+from typing import List, Tuple
+
+import numpy as np
+from numpy.typing import NDArray
+
 from src.game.client import Client
 from src.game.controller import BaseController
 from src.game.interface import BaseInterface
 from src.game.table import MarkType
-import random
-from typing import Tuple, List
-import numpy as np
-from numpy.typing import NDArray
 
 #####################################
 #   QUICK MACRO
@@ -62,8 +64,9 @@ class HumanController(BaseController[NDArray, Tuple[int, int]]):
             
             return y, x
 
-from numpy.typing import NDArray
 from typing import final
+
+from numpy.typing import NDArray
 
 
 class CMDInterface(BaseInterface):

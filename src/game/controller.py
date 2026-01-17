@@ -1,4 +1,5 @@
-from typing import Tuple, TypeVar, Generic, final
+from typing import Generic, Tuple, TypeVar, final
+
 from numpy.typing import NDArray
 
 ModelInputT = TypeVar("ModelInputT")

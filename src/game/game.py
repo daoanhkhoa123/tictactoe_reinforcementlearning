@@ -1,6 +1,8 @@
-from src.game.table import Table, MarkType
-from src.game.client import Client
 from typing import Optional
+
+from src.game.client import Client
+from src.game.table import MarkType, Table
+
 
 class Game:
     def __init__(self, client1: Client, client2:Client) -> None:

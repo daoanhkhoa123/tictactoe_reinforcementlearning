@@ -1,7 +1,9 @@
-from src.game.table import MarkType, Table
 from typing import Tuple
+
 from src.game.controller import BaseController
 from src.game.interface import BaseInterface
+from src.game.table import MarkType, Table
+
 
 class Client:
     def __init__(self, name:str, mark_type:MarkType, interface:BaseInterface, controller: BaseController, *, max_trial: int = 5) -> None:

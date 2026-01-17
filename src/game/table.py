@@ -1,6 +1,8 @@
+from enum import IntEnum
+
 import numpy as np
 from numpy.typing import NDArray
-from enum import IntEnum
+
 
 class MarkType(IntEnum):
     RED = 1
