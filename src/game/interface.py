@@ -1,5 +1,4 @@
 from numpy.typing import NDArray
-
 from game.client import Client
 
 

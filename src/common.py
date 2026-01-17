@@ -111,6 +111,9 @@ class CMDInterface(BaseInterface):
 
         print()
 
+class EmptyInterface(BaseInterface):
+    def show(self, client: Client, state: NDArray) -> None:
+        print("Bots is thinking...")
 
 def build_2clients( name1: str, name2: str,
         controller1: BaseController, controller2: BaseController,
