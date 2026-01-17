@@ -32,3 +32,12 @@ class Game:
             self.client2.play(self._table)
 
         return winner
+    
+    def owari(self, winner: MarkType):
+        w ="[EMPTY]"
+        if winner == self.client1.mark_type:
+            w = self.client1.name
+        if winner == self.client2.mark_type:
+            w  = self.client2.name
+
+        print("Player", w, "won the game!")

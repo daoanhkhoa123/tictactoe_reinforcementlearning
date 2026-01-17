@@ -14,21 +14,30 @@ class Client:
         self._interface = interface
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def mark_type(self):
+    def mark_type(self) -> MarkType:
         return self._mark_type
+
+    @property
+    def interface(self) -> BaseInterface:
+        return self._interface
+
+    @property
+    def controller(self) -> BaseController:
+        return self._controller
+
     
     def play(self, table: Table) -> None:
         state = table.get_table()
-        self._interface.show(self, state)
+        self.interface.show(self, state)
 
         trial = 0
         while trial < self._max_trial:
             trial += 1
-            y, x =self._controller.decide(state)
+            y, x =self.controller.decide(state)
             good_move = table.mark(y, x, self.mark_type)
             if good_move:
                 return
