@@ -1,5 +1,6 @@
 from numpy.typing import NDArray
-from game.client import Client
+
+from src.game.client import Client
 
 
 class BaseInterface:
