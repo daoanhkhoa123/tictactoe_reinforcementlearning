@@ -64,4 +64,4 @@ class BaseController(Generic[ModelInputT, ModelOutputT]):
         """
         Convert the model output into a concrete board coordinate.
         """
-        raise model_output # type: ignore
+        return model_output # type: ignore
