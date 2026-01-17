@@ -27,8 +27,7 @@ class Game:
     def hajime(self):
         self._table = Table()
         
-        winner = self._table.get_winner()
-        while winner == MarkType.EMPTY:
+        while winner:=self._table.get_winner() == MarkType.EMPTY:
             self.client1.play(self._table)
             self.client2.play(self._table)
 
