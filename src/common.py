@@ -64,11 +64,6 @@ class HumanController(BaseController[NDArray, Tuple[int, int]]):
             
             return y, x
 
-from typing import final
-
-from numpy.typing import NDArray
-
-
 class CMDInterface(BaseInterface):
     """
     Command-line interface for rendering the game state and prompting users.
@@ -94,7 +89,6 @@ class CMDInterface(BaseInterface):
             return "."
         raise ValueError(f"Unknown MarkType: {mark_type}")
 
-    @final
     def show(self, client: "Client", state: NDArray) -> None:
         """
         Render the board and show whose turn it is.
@@ -118,6 +112,22 @@ class CMDInterface(BaseInterface):
         print()
 
 
-    # default to through put ot it is fine
-    # def post_processing(self, model_output: Tuple[int, int]) -> Tuple[int, int]:
-    #     return model_output
+def build_2clients( name1: str, name2: str,
+        controller1: BaseController, controller2: BaseController,
+        interface1: BaseInterface, interface2: BaseInterface = BaseInterface()) -> Tuple[Client, Client]:
+    
+    client1 = Client(
+        name=name1,
+        mark_type=MarkType.BLU,
+        interface=interface1,
+        controller=controller1,
+    )
+
+    client2 = Client(
+        name=name2,
+        mark_type=MarkType.RED,
+        interface=interface2,
+        controller=controller2,
+    )
+
+    return client1, client2

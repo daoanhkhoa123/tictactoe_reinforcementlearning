@@ -34,22 +34,3 @@ class Client:
                 return
 
 
-def build_2clients( name1: str, name2: str,
-        controller1: BaseController, controller2: BaseController,
-        interface1: BaseInterface, interface2: BaseInterface ) -> Tuple[Client, Client]:
-    
-    client1 = Client(
-        name=name1,
-        mark_type=MarkType.BLU,
-        interface=interface1,
-        controller=controller1,
-    )
-
-    client2 = Client(
-        name=name2,
-        mark_type=MarkType.RED,
-        interface=interface2,
-        controller=controller2,
-    )
-
-    return client1, client2
