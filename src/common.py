@@ -3,6 +3,7 @@ import time
 from typing import List, Tuple
 
 import numpy as np
+from dataclasses import dataclass
 from numpy.typing import NDArray
 
 from src.game.client import Client
@@ -130,22 +131,30 @@ class EmptyInterface(BaseInterface):
     def show(self, client: Client, state: NDArray) -> None:
         print("Bot is thinking...")
 
-def build_2clients( name1: str, name2: str,
-        controller1: BaseController, controller2: BaseController,
-        interface1: BaseInterface, interface2: BaseInterface = BaseInterface()) -> Tuple[Client, Client]:
-    
-    client1 = Client(
-        name=name1,
-        mark_type=MarkType.BLU,
-        interface=interface1,
-        controller=controller1,
-    )
 
-    client2 = Client(
-        name=name2,
-        mark_type=MarkType.RED,
-        interface=interface2,
-        controller=controller2,
-    )
+########################
+#   FOR FASTER BUILD
+##########################
 
-    return client1, client2
+
+@dataclass
+class ClientArgs:
+    name:str
+    controller: BaseController
+    interface: BaseInterface
+
+def build_2clients(blu: ClientArgs, red: ClientArgs) -> Tuple[Client, Client]:
+    return (
+        Client(
+            name=blu.name,
+            mark_type=MarkType.BLU,
+            interface=blu.interface,
+            controller=blu.controller,
+        ),
+        Client(
+            name=red.name,
+            mark_type=MarkType.RED,
+            interface=red.interface,
+            controller=red.controller,
+        ),
+    )
