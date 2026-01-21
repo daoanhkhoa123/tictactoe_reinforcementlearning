@@ -40,6 +40,11 @@ class Environment(Game):
     def state(self):
         return self._table.get_table()
 
+    @property
+    def action_space(self) -> ActionSpace:
+        return self._table # type: ignore
+
     def reset(self) -> Tuple[NDArray, Any]:
         self.reset_table()
         return self.state, self.info
+    
