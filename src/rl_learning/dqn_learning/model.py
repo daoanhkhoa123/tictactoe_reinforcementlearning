@@ -4,7 +4,7 @@ from src.game.controller import BaseController
 from typing import Tuple
 import torch
 
-class DQN(nn.Module):
+class ModelDQN(nn.Module):
     def __init__(self, n_observations:int, n_actions:int, hidden:int = 128) -> None:
         super().__init__()
         self.layers = nn.Sequential(nn.Linear(n_observations, hidden),
