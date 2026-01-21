@@ -22,7 +22,7 @@ def index_to_coords(idx: int, ncols: int = 7) -> Tuple[int, int]:
     return idx // ncols, idx % ncols
 
 def emptycoords_from_table(table: NDArray) -> List[Tuple[int, int]]:
-    ys, xs = np.where(table == 0)
+    ys, xs = np.where(table == MarkType.EMPTY)
     return list(zip(ys.astype(int), xs.astype(int)))
 
 def emptyindex_from_table(table: NDArray, ncols: int = 7) -> List[int]:

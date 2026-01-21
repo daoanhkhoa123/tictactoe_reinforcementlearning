@@ -1,5 +1,5 @@
 from enum import IntEnum
-
+from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
@@ -15,6 +15,9 @@ class Table:
 
     def get_table(self) -> NDArray:
         return self._tictactoe.copy()
+    
+    def is_full(self) -> bool:
+        return np.all(self._tictactoe != MarkType.EMPTY).item()
     
     def get_winner(self) -> MarkType:
         b = self._tictactoe
@@ -58,3 +61,7 @@ class Table:
         self._tictactoe[y, x] = mark
         return True
     
+
+class TableFactory:
+    def __call__(self, *args: Any, **kwargs: Any) -> Table:
+        return Table(*args, **kwargs)
