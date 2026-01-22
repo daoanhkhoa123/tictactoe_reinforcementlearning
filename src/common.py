@@ -158,3 +158,8 @@ def build_2clients(blu: ClientArgs, red: ClientArgs) -> Tuple[Client, Client]:
             controller=red.controller,
         ),
     )
+
+################
+#   For reinforcement learning
+########################
+Action = Tuple[int, int]

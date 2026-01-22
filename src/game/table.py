@@ -13,8 +13,10 @@ class Table:
     def __init__(self) -> None:
         self._tictactoe = np.zeros((7, 7), dtype=np.int8)
 
-    def get_table(self) -> NDArray:
-        return self._tictactoe.copy()
+    def get_table(self, copy:bool = True) -> NDArray:
+        if copy:
+            return self._tictactoe.copy()
+        return self._tictactoe
     
     def is_full(self) -> bool:
         return np.all(self._tictactoe != MarkType.EMPTY).item()
