@@ -116,7 +116,7 @@ class MontelCarloClient(Client):
     def build_from_client(cls, client:Client):
         if not isinstance(client.controller, MontelCarloController):
             raise ValueError("Build that thing plese")
-        client.controller.mark_type = client.mark_type
+        client.controller.mark_type = client.mark_type # type: ignore
         return cls(client.name, client.mark_type, client.interface, client.controller) # type: ignore
     
     
