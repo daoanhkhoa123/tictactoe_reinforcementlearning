@@ -10,8 +10,9 @@ from src.game.controller import BaseController
 from src.game.client import Client
 from src.game.interface import BaseInterface
 from src.game.table import MarkType
+from src.game.client import Client
 
-class ReplayMemory:
+class _ReplayMemory:
     def __init__(self, capacity: Optional[int] = None) -> None:
         self.memory: Deque[str] = deque(maxlen=capacity)
 
@@ -35,16 +36,16 @@ class ReplayMemory:
 
 
 class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]):
-    def __init__(self, mark_type: int, *,
+    def __init__(self, *,
                  lr: float, decay_gamma: float, exp_rate: float = 0.3, file_name: str = "mnc_01") -> None:
         
         super().__init__()
-        self.mark_type = mark_type
+        self.mark_type = None
         self.exp = exp_rate
         self.lr = lr
         self.decay_gamma = decay_gamma
         self.state_value: Dict[str, float] = {}
-        self.memory = ReplayMemory()
+        self.memory = _ReplayMemory()
         self.file_name = file_name
 
     @staticmethod
@@ -110,3 +111,12 @@ class MontelCarloClient(Client):
     @property
     def controller(self) -> MontelCarloController:
         return self._controller
+
+    @classmethod
+    def build_from_client(cls, client:Client):
+        if not isinstance(client.controller, MontelCarloController):
+            raise ValueError("Build that thing plese")
+        client.controller.mark_type = client.mark_type
+        return cls(client.name, client.mark_type, client.interface, client.controller) # type: ignore
+    
+    
