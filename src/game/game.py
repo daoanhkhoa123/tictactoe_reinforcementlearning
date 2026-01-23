@@ -25,8 +25,13 @@ class Game:
         if self._table is None:
             raise KeyError("Please init the table first")
 
-        while (winner:=self._table.get_winner()) == MarkType.EMPTY or not self._table.is_full():
+        while (winner:=self._table.get_winner()) == MarkType.EMPTY:
+            if self._table.is_full():
+                break
             self.client1.play(self._table)
+
+            if self._table.is_full():
+                break
             self.client2.play(self._table)
 
         return winner
