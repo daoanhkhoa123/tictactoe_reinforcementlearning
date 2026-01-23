@@ -40,7 +40,7 @@ class Game:
         w ="[EMPTY]"
         if winner == self.client1.mark_type:
             w = self.client1.name
-        if winner == self.client2.mark_type:
+        elif winner == self.client2.mark_type:
             w  = self.client2.name
         else:
             print("Draw!")
