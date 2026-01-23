@@ -35,9 +35,10 @@ def emptyindex_from_table(table: NDArray, ncols: int = 7) -> List[int]:
 #########
 
 class RandomController(BaseController[List[int], int]):
-    def __init__(self, sleep_time: float = 3) -> None:
+    def __init__(self, sleep_time: float = 3, train:bool = True) -> None:
         super().__init__()
         self._sleep_time = sleep_time
+        self.train = train
 
     def pre_processing(self, input_state: NDArray) -> List[int]:
         return emptyindex_from_table(input_state)
@@ -48,7 +49,8 @@ class RandomController(BaseController[List[int], int]):
 
     def post_processing(self, model_output: int) -> Tuple[int, int]:
         coords = index_to_coords(model_output)
-        print("Bot chose:", coords)
+        if not self.train:
+            print("Bot chose:", coords)
         return coords
         
 class HumanController(BaseController[NDArray, Tuple[int, int]]):
