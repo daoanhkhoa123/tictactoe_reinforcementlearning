@@ -11,6 +11,7 @@ from src.game.client import Client
 from src.game.interface import BaseInterface
 from src.game.table import MarkType
 from src.game.client import Client
+from dataclasses import dataclass
 
 class _ReplayMemory:
     def __init__(self, capacity: Optional[int] = None) -> None:
@@ -34,19 +35,24 @@ class _ReplayMemory:
     def __len__(self) -> int:
         return len(self.memory)
 
+@dataclass
+class MontelHyperParams:
+    lr: float = 0.1
+    decay_gamma: float = 0.9
+    exp_rate: float = 0.3
 
 class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]):
-    def __init__(self, *,
-                 lr: float, decay_gamma: float, exp_rate: float = 0.3, file_name: str = "mnc_01") -> None:
-        
+    def __init__(self, mark_type, *,
+                hyper_params: MontelHyperParams) -> None:
+              
         super().__init__()
-        self.mark_type = None
-        self.exp = exp_rate
-        self.lr = lr
-        self.decay_gamma = decay_gamma
+
+        self.mark_type = mark_type
+        self.exp = hyper_params.exp_rate
+        self.lr = hyper_params.lr
+        self.decay_gamma = hyper_params.decay_gamma
         self.state_value: Dict[str, float] = {}
         self.memory = _ReplayMemory()
-        self.file_name = file_name
 
     @staticmethod
     def get_hash(state: NDArray) -> str:
@@ -93,8 +99,8 @@ class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]
     def reset_memory(self) -> None:
         self.memory.reset()
 
-    def save_policy(self) -> None:
-        with open(f"{self.file_name}.json", "w", encoding="utf-8") as f:
+    def save_policy(self, file_name:str) -> None:
+        with open(f"{file_name}.json", "w", encoding="utf-8") as f:
             json.dump(self.state_value, f)
 
     def load_policy(self, path: str) -> None:
@@ -112,11 +118,7 @@ class MontelCarloClient(Client):
     def controller(self) -> MontelCarloController:
         return self._controller
 
-    @classmethod
-    def build_from_client(cls, client:Client):
-        if not isinstance(client.controller, MontelCarloController):
-            raise ValueError("Build that thing plese")
-        client.controller.mark_type = client.mark_type # type: ignore
-        return cls(client.name, client.mark_type, client.interface, client.controller) # type: ignore
-    
-    
+def build_montelclient(client:Client, hyper_parms:MontelHyperParams)-> MontelCarloClient:
+    controller =  MontelCarloController(client.mark_type, hyper_params=hyper_parms)
+    return MontelCarloClient(client.name, client.mark_type, 
+                             client.interface, controller)
