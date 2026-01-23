@@ -9,7 +9,7 @@ from src.common import Action, emptycoords_from_table
 from src.game.controller import BaseController
 from src.game.client import Client
 from src.game.interface import BaseInterface
-from src.game.table import MarkType
+from src.game.table import MarkType, Table
 from src.game.client import Client
 from dataclasses import dataclass
 
@@ -86,6 +86,7 @@ class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]
         return action # type: ignore
 
     def post_processing(self, model_output: Action) -> Action:
+
         print("Montel chose", model_output)
         return model_output
 
@@ -121,6 +122,11 @@ class MontelCarloClient(Client):
     @property
     def controller(self) -> MontelCarloController:
         return self._controller
+    
+    def play(self, table: Table) -> None:
+        super().play(table)
+        hash = self.controller.get_hash(table.get_table(False))
+        self.controller.memory.push(hash)
 
 def build_montelclient(client:Client, hyper_parms:MontelHyperParams)-> MontelCarloClient:
     controller =  MontelCarloController(client.mark_type, hyper_params=hyper_parms)
