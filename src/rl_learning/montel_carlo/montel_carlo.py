@@ -42,14 +42,15 @@ class MontelHyperParams:
     exp_rate: float = 0.3
 
 class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]):
-    def __init__(self, mark_type, *,
-                hyper_params: MontelHyperParams) -> None:
+    def __init__(self, mark_type,  *,
+                hyper_params: MontelHyperParams, train:bool = True) -> None:
               
         super().__init__()
 
         self.mark_type = mark_type
         self.exp = hyper_params.exp_rate
         self.lr = hyper_params.lr
+        self.train = train
         self.decay_gamma = hyper_params.decay_gamma
         self.state_value: Dict[str, float] = {}
         self.memory = _ReplayMemory()
@@ -86,8 +87,8 @@ class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]
         return action # type: ignore
 
     def post_processing(self, model_output: Action) -> Action:
-
-        print("Montel chose", model_output)
+        if not self.train:
+            print("Montel chose", model_output)
         return model_output
 
     #############
