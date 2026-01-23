@@ -29,3 +29,5 @@ class Environment(Game):
 
         if isinstance(self.client2, MontelCarloClient):
             self.client2.controller.feed_reward(c2_reward)
+
+        super().owari(winner)
