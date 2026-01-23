@@ -71,20 +71,14 @@ class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]
         if random.random() <= self.exp:
             return random.choice(positions)
 
-        value_max: Optional[float] = None
-        action: Action
-
-        for pos in positions:
+        def value_of_sprime(pos: Action) -> float:
             next_state = state.copy()
             next_state[pos[0], pos[1]] = self.mark_type
+            
             key = self.get_hash(next_state)
-            value = self.state_value.get(key, 0.0)
+            return self.state_value.get(key, 0.0)
 
-            if value_max is None or value >= value_max:
-                value_max = value
-                action = pos
-
-        return action # type: ignore
+        return max(positions, key=value_of_sprime)
 
     def post_processing(self, model_output: Action) -> Action:
         if not self.train:
