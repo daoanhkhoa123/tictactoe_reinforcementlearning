@@ -85,6 +85,10 @@ class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]
 
         return action # type: ignore
 
+    def post_processing(self, model_output: Action) -> Action:
+        print("Montel chose", model_output)
+        return model_output
+
     #############
     # Addicitional
     #############
