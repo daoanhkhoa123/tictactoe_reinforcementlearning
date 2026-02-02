@@ -191,3 +191,13 @@ This module is meant for:
 
 It is **not** part of the core game engine and may evolve freely.
 
+# Reinforcement Learning
+
+## Overview
+- Implementations are located in `src\rl_learning`, with each folder corresponding to a specific algorithm.
+
+## DQN Learning
+- Currently under development; functionality is not yet complete.
+
+## Monte Carlo
+Main idea:
