@@ -32,7 +32,6 @@ class Client:
     
     def play(self, table: Table) -> None:
         state = table.get_table()
-        self.interface.show(self, state)
 
         trial = 0
         while trial < self._max_trial:
@@ -40,6 +39,7 @@ class Client:
             y, x =self.controller.decide(state)
             good_move = table.mark(y, x, self.mark_type)
             if good_move:
+                self.interface.show(self, state)
                 return
 
 
