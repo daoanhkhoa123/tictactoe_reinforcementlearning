@@ -21,20 +21,23 @@ class Game:
     def reset_table(self) -> None:
         self._table = self._table_factory()
 
-    def hajime(self):
+    def is_ended(self) -> bool:
+        return self._table.is_full() or self._table.get_winner() != MarkType.EMPTY
+
+    def hajime(self) -> MarkType:
         if self._table is None:
             raise KeyError("Please init the table first")
 
-        while (winner:=self._table.get_winner()) == MarkType.EMPTY:
-            if self._table.is_full():
-                break
+        while True:
             self.client1.play(self._table)
-
-            if self._table.is_full():
+            if self.is_ended():
                 break
-            self.client2.play(self._table)
 
-        return winner
+            self.client2.play(self._table)
+            if self.is_ended():
+                break
+
+        return self._table.get_winner()
     
     def owari(self, winner: MarkType):
         w ="[EMPTY]"
