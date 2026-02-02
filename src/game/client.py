@@ -41,6 +41,7 @@ class Client:
             good_move = table.mark(y, x, self.mark_type)
             if good_move:
                 self.interface.show(self, state)
+                print("testing")
                 return
 
 
