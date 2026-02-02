@@ -196,8 +196,4 @@ It is **not** part of the core game engine and may evolve freely.
 ## Overview
 - Implementations are located in `src\rl_learning`, with each folder corresponding to a specific algorithm.
 
-## DQN Learning
-- Currently under development; functionality is not yet complete.
-
-## Monte Carlo
-Main idea:
+- Check `README.md` under each alogrithm for more detail

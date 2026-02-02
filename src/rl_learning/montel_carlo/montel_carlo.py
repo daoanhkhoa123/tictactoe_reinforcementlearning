@@ -118,6 +118,9 @@ class MontelCarloClient(Client):
     def controller(self) -> MontelCarloController:
         return self._controller
     
+    def reset_memory(self):
+        return self.controller.reset_memory()
+
     def play(self, table: Table) -> None:
         super().play(table)
         hash = self.controller.get_hash(table.get_table(False))
