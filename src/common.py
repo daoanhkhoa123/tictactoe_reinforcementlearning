@@ -130,7 +130,12 @@ class CMDInterface(BaseInterface):
         print()
 
 class EmptyInterface(BaseInterface):
+    def __init__(self, sleep_time: float = 1) -> None:
+        super().__init__()
+        self._sleep_time = sleep_time
+
     def show(self, client: Client, state: NDArray) -> None:
+        time.sleep(self._sleep_time)
         print("Bot is thinking...")
 
 
