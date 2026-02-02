@@ -32,6 +32,7 @@ class Client:
     
     def play(self, table: Table) -> None:
         state = table.get_table()
+        self.interface.show(self, state)
 
         trial = 0
         while trial < self._max_trial:
