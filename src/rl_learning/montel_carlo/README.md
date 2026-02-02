@@ -13,7 +13,7 @@
 - To enable tabular storage, the state is converted into a hashable key:
 ``` python
 def get_hash(state: NDArray) -> str:
-    return str(state.flatten()
+    return str(state.flatten())
 ```
 
 - This key indexes the value table:
@@ -38,10 +38,24 @@ def feed_reward(self, reward: float) -> None:
 ---
 
 ## Policy (epsilon-Greedy)
-Action selection is implemented in model_call:
+Action selection is implemented in `model_call`:
 
-1. With probability epsilon = exp_rate, select a random legal action (exploration).
-2. Otherwise, select the action that maximizes the estimated value of the next state.
+1. With probability `epsilon = exp_rate`, select a random legal action (exploration).
+2. Otherwise, select the action that maximizes the estimated value of the next state. The flow is like this:
+``` python
+if random.random() <= self.exp:
+    return random.choice(positions)
+
+def value_of_sprime(pos: Action) -> float:
+    """ Try the action and get next state value """
+    next_state = state.copy()
+    next_state[pos[0], pos[1]] = self.mark_type
+    
+    key = self.get_hash(next_state)
+    return self.state_value.get(key, 0.0)
+
+return max(positions, key=value_of_sprime)
+```
 
 Value Evaluation
 $V(s') = \text{self.state\_value.get}(\text{hash}(s'), 0.0)$
