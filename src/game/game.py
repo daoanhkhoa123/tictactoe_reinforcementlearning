@@ -36,7 +36,11 @@ class Game:
             self.client2.play(self._table)
             if self.is_ended():
                 break
-
+        
+        # dirty hack, i know, but it does not work somehow idk
+        state = self._table.get_table()
+        self.client1.interface.show(self.client1, state)
+        self.client2.interface.show(self.client2, state)
         return self._table.get_winner()
     
     def owari(self, winner: MarkType):
