@@ -58,7 +58,7 @@ return max(positions, key=value_of_sprime)
 ```
 
 Value Evaluation
-$V(s') = \text{self.state\_value.get}(\text{hash}(s'), 0.0)$
+$V(s') = \texttt{self.state\_value.get}(\texttt{hash}(s'), 0.0)$
 
 Policy Definition
 $\pi(s) =
