@@ -61,8 +61,7 @@ Value Evaluation
 $V(s') = \texttt{self.statevalue.get}(\texttt{hash}(s'), 0.0)$
 
 Policy Definition
-$\pi(s) =
-\begin{cases}
+$\pi(s) = \begin{cases}
 \text{random action}, & \text{with probability } \varepsilon \\
 \arg\max_a V(s'), & \text{otherwise}
 \end{cases}$
