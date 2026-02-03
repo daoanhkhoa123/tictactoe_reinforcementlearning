@@ -1,6 +1,6 @@
 import random
 import time
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import numpy as np
 from dataclasses import dataclass
@@ -86,6 +86,9 @@ class CMDInterface(BaseInterface):
     """
     Command-line interface for rendering the game state and prompting users.
     """
+    def __init__(self, beautiful_map: Dict[MarkType, str] = {}) -> None:
+        super().__init__()
+        self.bf_map = beautiful_map
 
     @staticmethod
     def to_clienttext(mark_type: MarkType) -> str:
@@ -97,14 +100,14 @@ class CMDInterface(BaseInterface):
             return "Empty"
         raise ValueError(f"Unknown MarkType: {mark_type}")
 
-    @staticmethod
-    def to_statetext(mark_type: MarkType) -> str:
+    def to_statetext(self, mark_type: MarkType) -> str:
         if mark_type == MarkType.BLU:
-            return "B"
+            return self.bf_map.get(mark_type, "B")
         if mark_type == MarkType.RED:
-            return "R"
+            return self.bf_map.get(mark_type, "R")
         if mark_type == MarkType.EMPTY:
-            return "."
+            return self.bf_map.get(mark_type, ".")
+        
         raise ValueError(f"Unknown MarkType: {mark_type}")
 
     def show(self, client: "Client", state: NDArray) -> None:
@@ -142,6 +145,12 @@ class EmptyInterface(BaseInterface):
 ########################
 #   FOR FASTER BUILD
 ##########################
+
+COLOR_CMD_INTERFACE = {
+    MarkType.BLU: "🔵",   
+    MarkType.RED: "🔴",   
+    MarkType.EMPTY: ".", 
+}
 
 
 @dataclass

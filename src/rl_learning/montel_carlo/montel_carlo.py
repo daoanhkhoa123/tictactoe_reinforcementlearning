@@ -42,6 +42,8 @@ class MontelHyperParams:
     exp_rate: float = 0.3
 
 class MontelCarloController(BaseController[Tuple[NDArray, List[Action]], Action]):
+    _DEFAULT_INNER_MARKTYPE = MarkType.BLU
+
     def __init__(self, mark_type,  *,
                 hyper_params: MontelHyperParams, train:bool = True) -> None:
               
