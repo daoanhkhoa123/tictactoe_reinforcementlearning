@@ -24,7 +24,7 @@ class MTCSController(BaseController[State, Action]):
 
     def pre_processing(self, input_state: NDArray) -> State:
         if self.mark_type != self.DEFAULT_INNER_STATE:
-            input_state *= self.DEFAULT_INNER_STATE.value
+            input_state *= -1
         
         return input_state
 
