@@ -1,2 +1,5 @@
 Google collab:
 https://colab.research.google.com/drive/1E8LBApyTZbUHFyCfO3Cw-JkkY5wIsm-4?usp=sharing
+
+Montel Carlo Tree Search
+https://colab.research.google.com/drive/1WevxXJag_7nYPxb8OaWjAgTarYgi0RDV?usp=sharing

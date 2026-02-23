@@ -45,9 +45,10 @@ class Edge(Generic[S, D]):
 ##################
 
 ConnectedToT = TypeVar("ConnectedToT", bound="Node")
-
+import uuid
 class Node(Generic[ConnectedToT]):
     def __init__(self) -> None:
+        self.id = str(uuid.uuid4())
         self.value: float = 0.0
         self.visited_time: int = 0
         self._forward: Deque[Edge[Self, ConnectedToT]] = deque()
@@ -258,18 +259,87 @@ class MCTS:
     #   SERIALIZATION
     # ==================
 
+    def _to_dict(self):
+        nodes = {}
+        edges = []
+
+        for state_node in self.state_map.values():
+            nodes[state_node.id] = {
+                "type": "state",
+                "state": state_node.state.tolist(),
+                "value": state_node.value,
+                "visits": state_node.visited_time,
+            }
+
+            for action_node in state_node.get_neighbors():
+                nodes[action_node.id] = {
+                    "type": "action",
+                    "action": action_node.action,
+                    "value": action_node.value,
+                    "visits": action_node.visited_time,
+                }
+                edges.append((state_node.id, action_node.id))
+
+                for next_state in action_node.get_neighbors():
+                    edges.append((action_node.id, next_state.id))
+
+        return {
+            "utc_cons": self.utc_cons,
+            "nodes": nodes,
+            "edges": edges,
+        }
+
     def save(self, path: str) -> None:
-        """Save this MCTS instance to disk using pickle."""
+        """Save this MCTS instance to disk using pickle + manual dict representation."""
+        data = self._to_dict()
         with open(path, "wb") as f:
-            pickle.dump(self, f)
+            pickle.dump(data, f)
+
 
     @classmethod
     def load(cls, path: str) -> "MCTS":
+        import numpy as np 
         """Load an MCTS instance from disk."""
         with open(path, "rb") as f:
-            obj = pickle.load(f)
+            data = pickle.load(f)
 
-        if not isinstance(obj, cls):
-            raise TypeError(f"Pickle does not contain a {cls.__name__}")
+        if not isinstance(data, dict):
+            raise TypeError("Loaded data is not a dictionary")
 
-        return obj
+        utc_cons = data["utc_cons"]
+        nodes_dict = data["nodes"]
+        edges = data["edges"]
+
+        mcts = cls(utc_cons=utc_cons)
+        mcts._state_map.clear()           # just in case
+
+        # 1. Create all nodes (without connections yet)
+        id_to_node = {}
+
+        for node_id, info in nodes_dict.items():
+            if info["type"] == "state":
+                state = np.array(info["state"])   # assuming numpy array
+                node = StateNode(state)
+                node.id = node_id
+                node.value = info["value"]
+                node.visited_time = info["visits"]
+                mcts._state_map[get_statehash(state)] = node
+            else:  # action
+                action = info["action"]           # assuming Action is pickle-able
+                node = ActionNode(action)
+                node.id = node_id
+                node.value = info["value"]
+                node.visited_time = info["visits"]
+
+            id_to_node[node_id] = node
+
+        # 2. Rebuild connections using edges
+        for src_id, dst_id in edges:
+            src = id_to_node[src_id]
+            dst = id_to_node[dst_id]
+            src.connect(dst)   # this also adds backward edge
+
+        # 3. Memory is usually transient → reset or leave empty
+        mcts.memory.reset()
+
+        return mcts
