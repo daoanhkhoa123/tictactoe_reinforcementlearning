@@ -1,10 +1,10 @@
 # DO NOT DELETE THESE
-.venv/
-mlproduction/
-scripts/
+.venv
+mlproduction
+scripts
 push.cmd
 
-# Python cache
+# Python cache (any depth)
 **/__pycache__/
 **/*.pyc
 **/*.pyo
