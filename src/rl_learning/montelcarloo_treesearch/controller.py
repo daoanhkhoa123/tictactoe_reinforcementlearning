@@ -26,7 +26,7 @@ class MTCSController(BaseController[State, Action]):
         if self.mark_type != self.DEFAULT_INNER_STATE:
             input_state *= self.DEFAULT_INNER_STATE
         
-        return State(input_state)
+        return input_state
 
     def model_call(self, model_input: State) -> Action:
         return self.tree.play(model_input)
