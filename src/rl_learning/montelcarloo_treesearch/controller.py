@@ -39,4 +39,4 @@ class MTCSCLient(Client):   ...
 
 def build_mtcslient(client:Client, utc_cons:float)-> MTCSCLient:
     controller =  MTCSController(client.mark_type, utc_cons)
-    return MTCSCLient(client.name, client.mark_type, client.interface, co
+    return MTCSCLient(client.name, client.mark_type, client.interface, controller)
