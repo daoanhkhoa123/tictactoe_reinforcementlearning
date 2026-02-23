@@ -23,7 +23,6 @@ class MTCSController(BaseController[State, Action]):
         self.mark_type = mark_type
 
     def pre_processing(self, input_state: NDArray) -> State:
-        print(input_state , "sadsdassd")
         if self.mark_type != self.DEFAULT_INNER_STATE:
             input_state *= -1
         
