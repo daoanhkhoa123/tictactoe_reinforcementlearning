@@ -215,34 +215,31 @@ class MCTS:
         action.value += next_state_node.value
         self.backprogate_add(action, next_state_node.value)
 
-    def init_state(self, state: State) -> StateNode:
-        state_node = StateNode(state)
-        self.set_statenode(state, state_node)
+    def _register_state(self, state: State):
+        if not self.in_state_map(state):
+            state_node = StateNode(state)
+            self.set_statenode(state, state_node)
 
-        for action in getall_possible_actions(state):
-            state_node.connect(ActionNode(action))
+            for action in getall_possible_actions(state):
+                state_node.connect(ActionNode(action))
 
-        return state_node
+        else:
+            state_node = self.get_statenode(state)
+
+        if self.memory.last_action_node is not None:
+            self.connect_next_state(state_node)
+        self.memory.last_state_node = state_node
+        self.memory.last_state_node.visited_time += 1
 
     ##################
     #    USAGE
     ##################
 
     def play(self, state: State) -> Action:
-        if not self.in_state_map(state):
-            state_node = self.init_state(state)
-        else:
-            state_node = self.get_statenode(state)
-
-        if self.memory.last_action_node is not None:
-            self.connect_next_state(state_node)
+        self._register_state(state)
 
         self.memory.last_action_node = self.choose_best_actionode(state)
-        self.memory.last_state_node = state_node
-
         self.memory.last_action_node.visited_time += 1
-        self.memory.last_state_node.visited_time += 1
-
         return self.memory.last_action_node.action
 
     def feed_reward(self, reward: float, register_state: State) -> None:
@@ -251,7 +248,7 @@ class MCTS:
 
         # we have to also store the finished state for reward
         if register_state is not None:
-            self.play(register_state)
+            self._register_state(register_state)
 
         self.memory.last_state_node.value += reward
         self.backprogate_add(self.memory.last_state_node, reward)
