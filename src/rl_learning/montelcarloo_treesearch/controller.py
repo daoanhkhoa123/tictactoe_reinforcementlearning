@@ -23,6 +23,7 @@ class MTCSController(BaseController[State, Action]):
         self.mark_type = mark_type
 
     def pre_processing(self, input_state: NDArray) -> State:
+        print(input_state , "sadsdassd")
         if self.mark_type != self.DEFAULT_INNER_STATE:
             input_state *= -1
         
@@ -38,4 +39,4 @@ class MTCSCLient(Client):   ...
 
 def build_mtcslient(client:Client, utc_cons:float)-> MTCSCLient:
     controller =  MTCSController(client.mark_type, utc_cons)
-    return MTCSCLient(client.name, client.mark_type, client.interface, controller)
+    return MTCSCLient(client.name, client.mark_type, client.interface, co
