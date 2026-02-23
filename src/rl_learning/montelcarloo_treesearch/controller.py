@@ -12,22 +12,30 @@ from src.game.interface import BaseInterface
 from src.game.table import MarkType, Table
 from src.game.client import Client
 from dataclasses import dataclass
-from src.rl_learning.montelcarloo_treesearch.tree import Action, State, StateHashT, ActionNode, StateNode, MSTC
+from src.rl_learning.montelcarloo_treesearch.tree import Action, State, StateHashT, ActionNode, StateNode, MCTS
 
+class MTCSController(BaseController[State, Action]):
+    DEFAULT_INNER_STATE = MarkType.BLU
 
-@dataclass
-class MontelHyperParams:
-    lr: float = 0.1
-    decay_gamma: float = 0.9
-    exp_rate: float = 0.3
-
-class MontelCarloController(BaseController[State, Action]):
-    def __init__(self) -> None:
+    def __init__(self, mark_type: MarkType, utc_cons:float) -> None:
         super().__init__()
-        self.tree = MSTC()
+        self.tree = MCTS(utc_cons)
+        self.mark_type = mark_type
+
+    def pre_processing(self, input_state: NDArray) -> State:
+        if self.mark_type != self.DEFAULT_INNER_STATE:
+            input_state *= self.DEFAULT_INNER_STATE
+        
+        return State(input_state)
 
     def model_call(self, model_input: State) -> Action:
         return self.tree.play(model_input)
     
-    def feed_reward(self, reward:float):
-        return self.tree.feed_reward(reward)
+    def feed_reward(self, reward:float, last_state: State):
+        return self.tree.feed_reward(reward, last_state)
+    
+class MTCSCLient(Client):   ...
+
+def build_mtcslient(client:Client, utc_cons:float)-> MTCSCLient:
+    controller =  MTCSController(client.mark_type, utc_cons)
+    return MTCSCLient(client.name, client.mark_type, client.interface, controller)
