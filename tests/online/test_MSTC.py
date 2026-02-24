@@ -1,4 +1,4 @@
-from src.rl_learning.montelcarloo_treesearch.tree import MCTS, StateNode, ActionNode
+from src.rl_learning.montelcarloo_treesearch.tree import MCTS, StateNode, ActionNode, MCTSParams
 import numpy as np
 
 # ==============================
@@ -41,7 +41,7 @@ def print_node(node):
 
 # ---- Run MCTS ----
 
-mcts = MCTS()
+mcts = MCTS(MCTSParams(prune_threshold=0))
 
 # ==============================
 # EPISODE 1

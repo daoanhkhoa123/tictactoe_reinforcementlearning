@@ -143,6 +143,7 @@ class LastMemory:
 
 @dataclass(frozen=True)
 class MCTSParams:
+    safe_choice: bool = True
     utc_const: float = 1.4
     
     k: float = 5
@@ -278,10 +279,10 @@ class MCTS:
     #    USAGE
     ##################
 
-    def play(self, state: State, safe_choice: bool = True) -> Action:
+    def play(self, state: State) -> Action:
         self._register_state(state)
 
-        if safe_choice and not self.in_state_map(state):
+        if self.params.safe_choice and not self.in_state_map(state):
             return random.choice(getall_possible_actions(state))
 
         self.memory.last_action_node = self.choose_best_actionode(state)
