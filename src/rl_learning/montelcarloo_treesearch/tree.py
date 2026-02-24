@@ -267,10 +267,12 @@ class MCTS:
     #         state_node.connect(ActionNode(action))
     #         current += 1
 
-    def prune(self):
+    def prune(self) -> int:
         to_del = [h for h, n in self.state_map.items() if n.visited_time <= self.params.prune_threshold]
         for td in to_del:
             del self.state_map[td]
+
+        return len(to_del)
 
     ##################
     #    USAGE
