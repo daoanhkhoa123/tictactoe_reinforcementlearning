@@ -41,7 +41,7 @@ def print_node(node):
 
 # ---- Run MCTS ----
 
-mcts = MCTS(utc_cons=1.4)
+mcts = MCTS()
 
 # ==============================
 # EPISODE 1
