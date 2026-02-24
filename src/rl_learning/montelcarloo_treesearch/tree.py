@@ -236,36 +236,36 @@ class MCTS:
     ##############
     #   FOR OPTIMIZATION
     ##############
-    # def _register_state(self, state: State):
-    #     if not self.in_state_map(state):
-    #         state_node = StateNode(state)
-    #         self.set_statenode(state, state_node)
+    def _register_state(self, state: State):
+        if not self.in_state_map(state):
+            state_node = StateNode(state)
+            self.set_statenode(state, state_node)
 
-    #         for action in getall_possible_actions(state):
-    #             state_node.connect(ActionNode(action))
+            for action in getall_possible_actions(state):
+                state_node.connect(ActionNode(action))
 
-    #     else:
-    #         state_node = self.get_statenode(state)
+        else:
+            state_node = self.get_statenode(state)
 
-    #     if self.memory.last_action_node is not None:
-    #         self.connect_next_state(state_node)
-    #     self.memory.last_state_node = state_node
-    #     self.memory.last_state_node.visited_time += 1
+        if self.memory.last_action_node is not None:
+            self.connect_next_state(state_node)
+        self.memory.last_state_node = state_node
+        self.memory.last_state_node.visited_time += 1
 
-    def _register_state(self, state:State):
-        state_node = self.get_statenode(state)
-        max_children = int(self.params.k * (state_node.visited_time ** self.params.alpha))
-        current = len(list(state_node.get_neighbors()))
+    # def _register_state2(self, state:State):
+    #     state_node = self.get_statenode(state)
+    #     max_children = int(self.params.k * (state_node.visited_time ** self.params.alpha))
+    #     current = len(list(state_node.get_neighbors()))
 
-        if current >= max_children:
-            return
+    #     if current >= max_children:
+    #         return
         
-        for action in getall_possible_actions(state):
-            if current >= max_children:
-                return
+    #     for action in getall_possible_actions(state):
+    #         if current >= max_children:
+    #             return
             
-            state_node.connect(ActionNode(action))
-            current += 1
+    #         state_node.connect(ActionNode(action))
+    #         current += 1
 
     def prune(self):
         to_del = [h for h, n in self.state_map.items() if n.visited_time <= self.params.prune_threshold]
