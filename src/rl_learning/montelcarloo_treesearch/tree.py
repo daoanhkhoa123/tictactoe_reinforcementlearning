@@ -1,13 +1,15 @@
 import math
+import pickle
+import random
 from collections import deque
+from dataclasses import dataclass
 from enum import IntEnum, auto
 from typing import Deque, Generic, Iterator, Optional, TypeVar
 
 from numpy.typing import NDArray
 from typing_extensions import Self
-from dataclasses import dataclass
+
 from src.common import Action, emptycoords_from_table
-import pickle
 
 ##################
 #   CONNECTIONS
@@ -46,6 +48,8 @@ class Edge(Generic[S, D]):
 
 ConnectedToT = TypeVar("ConnectedToT", bound="Node")
 import uuid
+
+
 class Node(Generic[ConnectedToT]):
     def __init__(self) -> None:
         self.id = str(uuid.uuid4())
@@ -137,9 +141,19 @@ class LastMemory:
 #   MCTS CORE
 ##################
 
+@dataclass(frozen=True)
+class MCTSParams:
+    safe_choice: bool = True
+    utc_const: float = 1.4
+    
+    k: float = 5
+    alpha: float = 0.5
+
+    prune_threshold: int = 10
+
 class MCTS:
-    def __init__(self, utc_cons: float) -> None:
-        self._utc_cons = utc_cons
+    def __init__(self, params: MCTSParams = MCTSParams()) -> None:
+        self._params = params
         self._state_map: dict[StateHashT, StateNode] = {}
         self._memory = LastMemory()
 
@@ -148,12 +162,16 @@ class MCTS:
     ##################
 
     @property
+    def params(self):
+        return self._params
+
+    @property
     def state_map(self):
         return self._state_map
 
     @property
     def utc_cons(self):
-        return self._utc_cons
+        return self._params.utc_const
 
     @property
     def memory(self):
@@ -223,7 +241,13 @@ class MCTS:
         if not self.in_state_map(state):
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
+    def _register_state(self, state: State):
+        if not self.in_state_map(state):
+            state_node = StateNode(state)
+            self.set_statenode(state, state_node)
 
+            for action in getall_possible_actions(state):
+                state_node.connect(ActionNode(action))
             for action in getall_possible_actions(state):
                 state_node.connect(ActionNode(action))
 
@@ -245,19 +269,27 @@ class MCTS:
 
     #     if current >= max_children:
     #         return
+    #     if current >= max_children:
+    #         return
         
+    #     for action in getall_possible_actions(state):
+    #         if current >= max_children:
+    #             return
     #     for action in getall_possible_actions(state):
     #         if current >= max_children:
     #             return
             
     #         state_node.connect(ActionNode(action))
     #         current += 1
+    #         state_node.connect(ActionNode(action))
+    #         current += 1
 
-    def _prune(self):
-        prune_threshold = 2
-        to_del = [h for h, n in self.state_map.items() if n.visited_time <= prune_threshold]
+    def prune(self) -> int:
+        to_del = [h for h, n in self.state_map.items() if n.visited_time <= self.params.prune_threshold]
         for td in to_del:
             del self.state_map[td]
+
+        return len(to_del)
 
     ##################
     #    USAGE
@@ -265,6 +297,9 @@ class MCTS:
 
     def play(self, state: State) -> Action:
         self._register_state(state)
+
+        if self.params.safe_choice and not self.in_state_map(state):
+            return random.choice(getall_possible_actions(state))
 
         self.memory.last_action_node = self.choose_best_actionode(state)
         self.memory.last_action_node.visited_time += 1
@@ -311,7 +346,12 @@ class MCTS:
                     edges.append((action_node.id, next_state.id))
 
         return {
-            "utc_cons": self.utc_cons,
+            "params": {
+                "utc_const": self.params.utc_const,
+                "k": self.params.k,
+                "alpha": self.params.alpha,
+                "prune_threshold": self.params.prune_threshold,
+            },
             "nodes": nodes,
             "edges": edges,
         }
@@ -333,16 +373,23 @@ class MCTS:
         if not isinstance(data, dict):
             raise TypeError("Loaded data is not a dictionary")
 
-        utc_cons = data["utc_cons"]
-        nodes_dict = data["nodes"]
-        edges = data["edges"]
+        # Load params
+        params_dict = data["params"]
+        params = MCTSParams(
+            utc_const=params_dict["utc_const"],
+            k=params_dict["k"],
+            alpha=params_dict["alpha"],
+            prune_threshold=params_dict["prune_threshold"],
+        )
 
-        mcts = cls(utc_cons=utc_cons)
+        mcts = cls(params=params)
+
         mcts._state_map.clear()           # just in case
 
         # 1. Create all nodes (without connections yet)
         id_to_node = {}
-
+        nodes_dict = data["nodes"]
+        edges = data["edges"]
         for node_id, info in nodes_dict.items():
             if info["type"] == "state":
                 state = np.array(info["state"])   # assuming numpy array
@@ -366,7 +413,7 @@ class MCTS:
             dst = id_to_node[dst_id]
             src.connect(dst)   # this also adds backward edge
 
-        # 3. Memory is usually transient → reset or leave empty
+        # 3. Memory is usually transient, reset or leave empty
         mcts.memory.reset()
 
         return mcts
