@@ -89,7 +89,7 @@ State = NDArray
 
 
 def get_statehash(array: State) -> StateHashT:
-    return StateHashT(array.tobytes())
+    return StateHashT(array.flatten())
 
 
 ##################
