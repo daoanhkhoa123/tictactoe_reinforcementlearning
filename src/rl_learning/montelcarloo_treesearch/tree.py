@@ -237,20 +237,14 @@ class MCTS:
     ##############
     #   FOR OPTIMIZATION
     ##############
-    def _register_state(self, state: State):
-        if not self.in_state_map(state):
-            state_node = StateNode(state)
-            self.set_statenode(state, state_node)
-    def _register_state(self, state: State):
+    def _register_state(self, state: State, is_last: bool = True):
         if not self.in_state_map(state):
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
 
-            for action in getall_possible_actions(state):
-                state_node.connect(ActionNode(action))
-            for action in getall_possible_actions(state):
-                state_node.connect(ActionNode(action))
-
+            if not is_last:
+                for action in getall_possible_actions(state):
+                    state_node.connect(ActionNode(action))
         else:
             state_node = self.get_statenode(state)
 
