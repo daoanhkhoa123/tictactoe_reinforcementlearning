@@ -41,7 +41,7 @@ def print_node(node):
 
 # ---- Run MCTS ----
 
-mcts = MCTS(MCTSParams(prune_threshold=0))
+mcts = MCTS(MCTSParams(prune_threshold=1))
 
 # ==============================
 # EPISODE 1
@@ -121,6 +121,8 @@ mcts.feed_reward(4.5, state)
 # TREE INSPECTION
 # ==============================
 
+print("Pruned nodes:", mcts.prune())
+
 print("\n========== TREE (BFS from initial state) ==========")
 root_state = np.array([[0, 0],
                        [0, 0]])
@@ -128,3 +130,4 @@ root_state = np.array([[0, 0],
 for node in mcts.bfs_traversal(root_state):
     print_node(node)
     print("-" * 40)
+
