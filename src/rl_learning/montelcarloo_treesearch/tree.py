@@ -241,21 +241,15 @@ class MCTS:
         if not self.in_state_map(state):
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
-    def _register_state(self, state: State):
-        if not self.in_state_map(state):
-            state_node = StateNode(state)
-            self.set_statenode(state, state_node)
 
             for action in getall_possible_actions(state):
                 state_node.connect(ActionNode(action))
-            for action in getall_possible_actions(state):
-                state_node.connect(ActionNode(action))
-
         else:
             state_node = self.get_statenode(state)
 
         if self.memory.last_action_node is not None:
             self.connect_next_state(state_node)
+            
         self.memory.last_state_node = state_node
         self.memory.last_state_node.visited_time += 1
 
