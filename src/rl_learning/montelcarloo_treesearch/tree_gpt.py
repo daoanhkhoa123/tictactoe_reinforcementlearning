@@ -69,7 +69,9 @@ class Node(Generic[ConnectedToT]):
         self._forward.append(e)
         node._backward.append(e)
 
-    def get_neighbors(self, con_type: CONN_TYPE = CONN_TYPE.FORWARD) -> Iterator[ConnectedToT]:
+    def get_neighbors(
+        self, con_type: CONN_TYPE = CONN_TYPE.FORWARD
+    ) -> Iterator[ConnectedToT]:
         if con_type is CONN_TYPE.FORWARD:
             for e in self._forward:
                 yield e.dst
@@ -94,7 +96,6 @@ State = NDArray
 
 
 def get_statehash(state: State) -> bytes:
-    # much faster + smaller than tobytes() everywhere
     return state.data.tobytes()
 
 
@@ -156,6 +157,11 @@ class MCTS:
         self._state_map: Dict[bytes, StateNode] = {}
         self._memory = LastMemory()
 
+    @property
+    def memory(self):
+        return self._memory
+ 
+
     # ---------- helpers ----------
 
     def _get_or_create_state(self, state: State) -> StateNode:
@@ -192,7 +198,9 @@ class MCTS:
     def choose_best_actionnode(self, state_node: StateNode) -> ActionNode:
         return max(
             state_node.get_neighbors(),
-            key=lambda a: a.utc_value(state_node.visited_time, self._params.utc_const),
+            key=lambda a: a.utc_value(
+                state_node.visited_time, self._params.utc_const
+            ),
         )
 
     # ---------- public API ----------
@@ -206,10 +214,12 @@ class MCTS:
 
         state_node.visited_time += 1
 
-        if self._params.safe_choice and not state_node._forward:
-            return random.choice(emptycoords_from_table(state))
+        action_node = (
+            random.choice(list(state_node.get_neighbors()))
+            if self._params.safe_choice and state_node._forward
+            else self.choose_best_actionnode(state_node)
+        )
 
-        action_node = self.choose_best_actionnode(state_node)
         action_node.visited_time += 1
 
         self._memory.last_state_node = state_node
@@ -218,16 +228,23 @@ class MCTS:
         return action_node.action
 
     def feed_reward(self, reward: float, next_state: Optional[State]) -> None:
-        if self._memory.last_state_node is None:
-            raise ValueError("Call play() before feed_reward()")
+        if self._memory.last_action_node is None:
+            raise ValueError("play() must be called before feed_reward()")
 
+        # ----- register transition -----
         if next_state is not None:
             next_node = self._get_or_create_state(next_state)
-            self._memory.last_action_node.connect(next_node) # type: ignore
+
+            if next_node not in self._memory.last_action_node.get_neighbors():
+                self._memory.last_action_node.connect(next_node)
+
             next_node.visited_time += 1
-            self.backpropagate(next_node, reward)
-        else:
-            self.backpropagate(self._memory.last_state_node, reward)
+            self._expand_state(next_node)
+
+            self._memory.last_state_node = next_node
+
+        # ----- backprop reward -----
+        self.backpropagate(self._memory.last_state_node, reward)  # type: ignore
 
     def prune(self) -> int:
         to_delete = [
@@ -237,6 +254,24 @@ class MCTS:
         for h in to_delete:
             del self._state_map[h]
         return len(to_delete)
+
+    def bfs_traversal(self, start_state: State):
+        start = self._state_map.get(get_statehash(start_state))
+        if start is None:
+            return
+
+        queue = deque([start])
+        visited: Set[str] = set()
+
+        while queue:
+            node = queue.popleft()
+            if node.id in visited:
+                continue
+            visited.add(node.id)
+
+            yield node
+            for neigh in node.get_neighbors():
+                queue.append(neigh)  # type: ignore
 
     # ---------- serialization ----------
 
