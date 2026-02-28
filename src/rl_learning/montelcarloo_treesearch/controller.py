@@ -1,18 +1,12 @@
-import json
-import random
-from collections import deque
-from typing import Deque, Dict, Iterator, List, Optional, Tuple
+from typing import Optional
 
-from numpy import dtype
 from numpy.typing import NDArray
 
 from src.game.controller import BaseController
 from src.game.client import Client
-from src.game.interface import BaseInterface
-from src.game.table import MarkType, Table
+from src.game.table import MarkType
 from src.game.client import Client
-from dataclasses import dataclass
-from src.rl_learning.montelcarloo_treesearch.tree import Action, State, StateHashT, ActionNode, StateNode, MCTS, MCTSParams
+from src.rl_learning.montelcarloo_treesearch.tree import Action, State, MCTS, MCTSParams
 
 class MTCSController(BaseController[State, Action]):
     DEFAULT_INNER_STATE = MarkType.BLU
