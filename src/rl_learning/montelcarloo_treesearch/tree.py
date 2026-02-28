@@ -227,7 +227,7 @@ class MCTS:
 
     def connect_next_state(self, next_state_node: StateNode) -> None:
         if self.memory.last_action_node is None:
-            raise ValueError("No previous action")
+            raise ValueError("No previous action"  )
 
         action = self.memory.last_action_node
         action.connect(next_state_node)
@@ -249,7 +249,7 @@ class MCTS:
 
         if self.memory.last_action_node is not None:
             self.connect_next_state(state_node)
-            
+
         self.memory.last_state_node = state_node
         self.memory.last_state_node.visited_time += 1
 
