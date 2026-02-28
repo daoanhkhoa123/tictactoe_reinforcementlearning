@@ -251,6 +251,31 @@ class MCTS:
         action.connect(next_state_node)
         self.backprogate_add(action, next_state_node.value)
 
+    def prune(self) -> int:
+        to_del = [
+            h for h, n in self.state_map.items()
+            if n.visited_time < self.params.prune_threshold
+        ]
+
+        for h in to_del:
+            node = self.state_map[h]
+
+            # Remove forward edges from parents (ActionNodes → this StateNode)
+            for parent in node.get_neighbors(CONN_TYPE.BACKWARD):
+                parent._forward = deque(
+                    e for e in parent._forward if e.dst is not node
+                )
+
+            # Remove backward edges from children (this StateNode → ActionNodes)
+            for action in node.get_neighbors(CONN_TYPE.FORWARD):
+                action._backward = deque(
+                    e for e in action._backward if e.src is not node
+                )
+
+            del self.state_map[h]
+
+        return len(to_del)
+
     ##############
     #   FOR OPTIMIZATION
     ##############
@@ -297,17 +322,7 @@ class MCTS:
     #         state_node.connect(ActionNode(action))
     #         current += 1
 
-    def prune(self) -> int:
-        to_del = [h for h, n in self.state_map.items() if n.visited_time < self.params.prune_threshold]
-        for td in to_del:
-            node = self.state_map[td]
 
-            for parent in node.get_neighbors(CONN_TYPE.BACKWARD):
-                parent._forward = deque(e for e in parent._forward if e.dst is not None)
-            del self.state_map[td]
-
-            
-        return len(to_del)
 
     ##################
     #    USAGE
