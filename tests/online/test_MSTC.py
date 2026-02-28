@@ -124,10 +124,8 @@ mcts.feed_reward(4.5, state)
 print("Pruned nodes:", mcts.prune())
 
 print("\n========== TREE (BFS from initial state) ==========")
-root_state = np.array([[0, 0],
-                       [0, 0]])
 
-for node in mcts.bfs_traversal(root_state):
+for node in mcts.bfs_traversal(mcts.memory.first_root):
     print_node(node)
     print("-" * 40)
 

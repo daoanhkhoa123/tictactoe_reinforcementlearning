@@ -293,7 +293,8 @@ class MCTS:
 
     def play(self, state: State) -> Action:
         self._register_state(state)
-        self.memory.first_root = state
+        if self.memory.first_root is None:
+            self.memory.first_root = state
 
         if self.params.safe_choice and not self.in_state_map(state):
             return random.choice(getall_possible_actions(state))
