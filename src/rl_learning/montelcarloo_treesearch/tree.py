@@ -237,13 +237,16 @@ class MCTS:
     ##############
     #   FOR OPTIMIZATION
     ##############
-    def _register_state(self, state: State):
+    def _register_state(self, state: State, is_last: bool = False):
         if not self.in_state_map(state):
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
 
             for action in getall_possible_actions(state):
                 state_node.connect(ActionNode(action))
+            for action in getall_possible_actions(state):
+                state_node.connect(ActionNode(action))
+
         else:
             state_node = self.get_statenode(state)
 
@@ -279,7 +282,7 @@ class MCTS:
     #         current += 1
 
     def prune(self) -> int:
-        to_del = [h for h, n in self.state_map.items() if n.visited_time <= self.params.prune_threshold]
+        to_del = [h for h, n in self.state_map.items() if n.visited_time < self.params.prune_threshold]
         for td in to_del:
             del self.state_map[td]
 
@@ -305,7 +308,7 @@ class MCTS:
 
         # we have to also store the finished state for reward
         if register_state is not None:
-            self._register_state(register_state)
+            self._register_state(register_state, is_last=True)
 
         self.memory.last_state_node.value += reward
         self.backprogate_add(self.memory.last_state_node, reward)
