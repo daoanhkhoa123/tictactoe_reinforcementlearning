@@ -103,6 +103,7 @@ class StateNode(Node["ActionNode"]):
     def __init__(self, state: State) -> None:
         super().__init__()
         self.state = state
+        self.expanded = False
 
     def __str__(self) -> str:
         return f"StateNode state= {self.state}, value={self.value}, visits={self.visited_time}"
@@ -191,10 +192,19 @@ class MCTS:
 
     def bfs_traversal(self, start: State):
         queue = deque()
-        queue.append(self.get_statenode(start))
+        visited = set()
+        start_node = self.get_statenode(start)
+        if start_node is None:
+            return
+        
+        queue.append(start_node)
 
         while queue:
             node = queue.popleft()
+
+            if node in visited:
+                continue
+            visited.add(node)
             yield node
             for neigh in node.get_neighbors():
                 queue.append(neigh)
@@ -214,12 +224,12 @@ class MCTS:
         visited = set()
         
         while stack:
-            next = stack.pop()
-            if next.id in visited:
+            next = stack.popleft()
+            if next in visited:
                 continue
 
             next.value += value          
-            visited.add(next.id)
+            visited.add(next)
             for next_next in next.get_neighbors(CONN_TYPE.BACKWARD):
                 stack.append(next_next)
 
@@ -239,7 +249,6 @@ class MCTS:
 
         action = self.memory.last_action_node
         action.connect(next_state_node)
-        action.value += next_state_node.value
         self.backprogate_add(action, next_state_node.value)
 
     ##############
@@ -251,9 +260,11 @@ class MCTS:
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
 
-            if not is_last:
+            if not state_node.expanded and not is_last:
                 for action in getall_possible_actions(state):
                     state_node.connect(ActionNode(action))
+
+                state_node.expanded = True
 
         if self.memory.last_action_node is not None:
             self.connect_next_state(state_node)
@@ -289,8 +300,13 @@ class MCTS:
     def prune(self) -> int:
         to_del = [h for h, n in self.state_map.items() if n.visited_time < self.params.prune_threshold]
         for td in to_del:
+            node = self.state_map[td]
+
+            for parent in node.get_neighbors(CONN_TYPE.BACKWARD):
+                parent._forward = deque(e for e in parent._forward if e.dst is not None)
             del self.state_map[td]
 
+            
         return len(to_del)
 
     ##################
@@ -302,8 +318,6 @@ class MCTS:
             self.memory.first_root = state
         
         self._register_state(state)
-        if self.params.safe_choice and self.get_statenode(state) is None:
-            return random.choice(getall_possible_actions(state))
 
         self.memory.last_action_node = self.choose_best_actionode(state)
         self.memory.last_action_node.visited_time += 1
@@ -317,7 +331,6 @@ class MCTS:
         if register_state is not None:
             self._register_state(register_state, is_last=True)
 
-        self.memory.last_state_node.value += reward
         self.backprogate_add(self.memory.last_state_node, reward)
       
 
