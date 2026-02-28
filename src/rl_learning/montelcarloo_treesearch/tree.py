@@ -131,6 +131,7 @@ getall_possible_actions = emptycoords_from_table
 class LastMemory:
     last_action_node: Optional[ActionNode] = None
     last_state_node: Optional[StateNode] = None
+    first_root: Optional[State] =  None
 
     def reset(self) -> None:
         self.last_action_node = None
@@ -242,8 +243,9 @@ class MCTS:
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
 
-            for action in getall_possible_actions(state):
-                state_node.connect(ActionNode(action))
+            if not is_last:
+                for action in getall_possible_actions(state):
+                    state_node.connect(ActionNode(action))
         else:
             state_node = self.get_statenode(state)
 
@@ -291,6 +293,7 @@ class MCTS:
 
     def play(self, state: State) -> Action:
         self._register_state(state)
+        self.memory.first_root = state
 
         if self.params.safe_choice and not self.in_state_map(state):
             return random.choice(getall_possible_actions(state))

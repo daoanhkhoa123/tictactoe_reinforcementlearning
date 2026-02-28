@@ -3,6 +3,7 @@
 mlproduction
 scripts
 push.cmd
+.vscode
 
 # Python cache (any depth)
 **/__pycache__/
