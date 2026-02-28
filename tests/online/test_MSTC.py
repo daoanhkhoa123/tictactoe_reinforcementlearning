@@ -125,7 +125,7 @@ print("Pruned nodes:", mcts.prune())
 
 print("\n========== TREE (BFS from initial state) ==========")
 
-for node in mcts.bfs_traversal(mcts.memory.first_root):
+for node in mcts.bfs_traversal(mcts.memory.first_root): # type: ignore
     print_node(node)
     print("-" * 40)
 

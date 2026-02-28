@@ -85,15 +85,14 @@ class Node(Generic[ConnectedToT]):
 #   STATE TYPES
 ##################
 
-class StateHashT(str):
-    ...
+StateHashT = bytes
 
 
 State = NDArray
 
 
 def get_statehash(array: State) -> StateHashT:
-    return StateHashT(array.tobytes())
+    return array.data.tobytes()
 
 
 ##################
@@ -186,10 +185,6 @@ class MCTS:
     def last_state_node(self):
         return self.memory.last_state_node
 
-
-    def in_state_map(self, state: State):
-        return get_statehash(state) in self.state_map
-
     ##################
     #   TRAVERSAL
     ##################
@@ -208,19 +203,31 @@ class MCTS:
     #   BACKEND
     ##################
 
-    def get_statenode(self, state: State) -> StateNode:
-        return self.state_map[get_statehash(state)]
+    def get_statenode(self, state: State) -> Optional[StateNode]:
+        return self.state_map.get(get_statehash(state))
 
     def set_statenode(self, state: State, state_node: StateNode) -> None:
         self.state_map[get_statehash(state)] = state_node
 
     def backprogate_add(self, node: Node, value: float) -> None:
-        for prev in node.get_neighbors(CONN_TYPE.BACKWARD):
-            prev.value += value
-            self.backprogate_add(prev, value)
+        stack = deque([node])
+        visited = set()
+        
+        while stack:
+            next = stack.pop()
+            if next.id in visited:
+                continue
+
+            next.value += value          
+            visited.add(next.id)
+            for next_next in next.get_neighbors(CONN_TYPE.BACKWARD):
+                stack.append(next_next)
 
     def choose_best_actionode(self, state: State) -> ActionNode:
         state_node = self.get_statenode(state)
+        if state_node is None:
+            raise RuntimeError()
+        
         return max(
             state_node.get_neighbors(),
             key=lambda a: a.utc_value(state_node.visited_time, self.utc_cons),
@@ -228,7 +235,7 @@ class MCTS:
 
     def connect_next_state(self, next_state_node: StateNode) -> None:
         if self.memory.last_action_node is None:
-            raise ValueError("No previous action"  )
+            raise ValueError("No previous action")
 
         action = self.memory.last_action_node
         action.connect(next_state_node)
@@ -239,15 +246,14 @@ class MCTS:
     #   FOR OPTIMIZATION
     ##############
     def _register_state(self, state: State, is_last: bool = False):
-        if not self.in_state_map(state):
+        state_node = self.get_statenode(state)
+        if state_node is None:
             state_node = StateNode(state)
             self.set_statenode(state, state_node)
 
             if not is_last:
                 for action in getall_possible_actions(state):
                     state_node.connect(ActionNode(action))
-        else:
-            state_node = self.get_statenode(state)
 
         if self.memory.last_action_node is not None:
             self.connect_next_state(state_node)
@@ -292,11 +298,11 @@ class MCTS:
     ##################
 
     def play(self, state: State) -> Action:
-        self._register_state(state)
         if self.memory.first_root is None:
             self.memory.first_root = state
-
-        if self.params.safe_choice and not self.in_state_map(state):
+        
+        self._register_state(state)
+        if self.params.safe_choice and self.get_statenode(state) is None:
             return random.choice(getall_possible_actions(state))
 
         self.memory.last_action_node = self.choose_best_actionode(state)
