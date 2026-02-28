@@ -244,9 +244,6 @@ class MCTS:
 
             for action in getall_possible_actions(state):
                 state_node.connect(ActionNode(action))
-            for action in getall_possible_actions(state):
-                state_node.connect(ActionNode(action))
-
         else:
             state_node = self.get_statenode(state)
 
