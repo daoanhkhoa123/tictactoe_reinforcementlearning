@@ -32,7 +32,8 @@ game.owari(winner)
 
 - /src/: for all the code
 - /runtimes/: ipynbs or anything for runtimes code, mainly for usage on cloud like kaggle or collab
-- /weights/: all model weights (optionals)
+- /weights/: stores model weights (optional). Pretrained weights are available at: ![weight folder at google drive](https://drive.google.com/drive/folders/1LQLHIQYyo9HrKsDWokkPErK6xHugu3Lo?usp=sharing)
+
 
 # Game
 
