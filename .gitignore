@@ -1,0 +1,14 @@
+# DO NOT DELETE THESE
+.venv
+mlproduction
+scripts
+push.cmd
+.vscode
+
+# Python cache (any depth)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Ignore intermediate weight snapshots
+weights/deep_actor_critic_ep*.pt
