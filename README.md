@@ -197,5 +197,55 @@ It is **not** part of the core game engine and may evolve freely.
 
 ## Overview
 - Implementations are located in `src\rl_learning`, with each folder corresponding to a specific algorithm.
+- Check `README.md` under each algorithm for more detail.
 
-- Check `README.md` under each alogrithm for more detail
+## Actor-Critic Self-Play
+
+- Training uses the new `src.rl_learning.actor_critic.actor_critic` module and defaults to 5,000 self-play episodes where two actor-critic agents replace the previous tree search rollout. Progress logs are emitted every 50 episodes, and checkpoints land in `weights/actor_critic_epXXXX.npz` plus a `weights/actor_critic_latest.npz` so you can snapshot without tearing down existing tables.
+- Each checkpoint is saved every 100 episodes, and the trainer mentions that the target performance is roughly a 1,500 Elo Stockfish baseline in the logs.
+- After finishing, load the weights with `ActorCriticPolicy.load` (or `build_client_from_weights`) if you want to plug the trained agent into the `Game` runner for human play.
+- To launch a full training run:
+
+```bash
+python -m src.rl_learning.actor_critic.actor_critic
+```
+
+The module exposes `ActorCriticTrainer.best_client(...)` to build a `Client` from the most-recent policy and `build_client_from_weights(...)` for replaying saved checkpoints.
+
+### Deep convergence training (CNN actor-critic)
+
+- The new convolutional actor-critic lives in `src.rl_learning.actor_critic.deep_actor_critic`: it encodes a 7×7 view, applies two Conv2D layers, flattens into a shared 256-unit projection, and branches into a 49-way actor head plus a scalar critic head.
+- Launch a full 5,000-episode self-play run that checks in every 100 episodes by using the GPU-friendly CLI:
+
+```bash
+  python -m src.rl_learning.actor_critic.deep_train \
+    --episodes 5000 \
+    --save-every 100 \
+    --progress-every 50 \
+    --baseline 2000 \
+    --weights-dir weights \
+    --entropy-coef 0.005 \
+    --block-bonus 0.25 \
+    --use-gpu
+```
+
+  The CLI prints a reminder to run inside a CUDA-capable build when `--use-gpu` is specified, but it otherwise behaves the same as the plain NumPy trainer while targeting a Stockfish-2000–level baseline. The new `--entropy-coef` and `--block-bonus` flags control how strongly the actor is regularized and rewarded when it reduces opponent threats; tune them up early in training if you want more exploration or faster block-learning.
+
+- After training, `weights/deep_actor_critic_latest.pt` (and epoch checkpoints) can be fed to `play_bot.py`: if the `.pt` extension is detected the script uses the CNN policy, otherwise it falls back to the legacy tabular/linear weights. The history-enhanced CLI you already have continues to render the move log for every match.
+
+#### Resuming after interruptions
+
+- The trainer now supports `--resume` plus `--start-*` flags so you can pick up from the last checkpoint after a `Ctrl+C`. For example, to continue from `weights/deep_actor_critic_ep117200.pt` while preserving the previously logged stats, run:
+
+  ```bash
+  python -m src.rl_learning.actor_critic.deep_train \
+    --resume weights/deep_actor_critic_ep117200.pt \
+    --start-episode 117200 \
+    --start-blu 100184 \
+    --start-red 16798 \
+    --start-draw 18 \
+    --episodes 100000 \
+    --weights-dir weights
+  ```
+
+  If the stats are not important, omit the `--start-*` flags and the counts will restart from zero while still resuming the model weights. The script automatically continues from the checkpointed episode number, so you do not “lose” the prior progress; you only need to run from the latest `.pt` file. After restarting, use `python src/rl_learning/actor_critic/play_bot.py --weights weights/deep_actor_critic_latest.pt --stochastic` to sample the new policy while watching its move history and verifying the blocking bonuses are working.

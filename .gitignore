@@ -9,3 +9,6 @@ push.cmd
 **/__pycache__/
 **/*.pyc
 **/*.pyo
+
+# Ignore intermediate weight snapshots
+weights/deep_actor_critic_ep*.pt

@@ -30,7 +30,7 @@ class Client:
         return self._controller
 
     
-    def play(self, table: Table) -> None:
+    def play(self, table: Table) -> Tuple[int, int]:
         state = table.get_table()
         self.interface.show(self, state)
 
@@ -40,6 +40,5 @@ class Client:
             y, x =self.controller.decide(state)
             good_move = table.mark(y, x, self.mark_type)
             if good_move:
-                return
-
+                return y, x
 
